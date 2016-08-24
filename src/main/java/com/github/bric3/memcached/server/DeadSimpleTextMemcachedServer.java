@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class DeadSimpleTextMemcachedServer {
+    public static final int DEFAULT_PORT = 11211;
 
     private final int port;
     private EventLoopGroup eventExecutors;
@@ -19,21 +20,25 @@ public class DeadSimpleTextMemcachedServer {
         this.port = port;
     }
 
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Requires port number");
-            System.exit(1);
-        }
-
-        int port = Integer.parseInt(args[0]);
+    public static void main(String[] args) throws InterruptedException {
+        int port = portFromArgsOrDefault(args);
         new DeadSimpleTextMemcachedServer(port).startBlocking();
     }
 
-    private void startBlocking() {
+    private static int portFromArgsOrDefault(String[] args) {
+        if (args.length != 1) {
+            System.out.format("Using default port : %d%n", DEFAULT_PORT);
+            return DEFAULT_PORT;
+        }
+        return Integer.parseInt(args[0]);
+    }
+
+    private void startBlocking() throws InterruptedException {
         try {
-            start();
+            internalStart();
+            channelFuture.channel().closeFuture().sync();
         } finally {
-            stop();
+            eventExecutors.shutdownGracefully().sync();
         }
     }
 

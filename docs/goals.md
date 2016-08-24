@@ -22,3 +22,18 @@ high­performance, concurrent code, the following constraints must be followed:
 Building such a server could obviously be endless, therefore it’s important to bound this 
 exercise to a reasonable duration, probably in the 5­6h. The additional improvements that 
 couldn’t be made on time can be discussed along with the solution.
+
+
+
+
+My TODO list : 
+
+
+* [x] pom structure  
+* [ ] Maven assembly
+* [x] make a simple tcp server that binds to 0.0.0.0 on a given port
+* [x] make main method
+* [ ] implement set handler
+* [ ] implement get handler
+* [ ] investigate cache
+* [ ] performance tests 
