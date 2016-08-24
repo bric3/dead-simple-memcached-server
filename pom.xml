@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.bric3</groupId>
+    <groupId>com.github.bric3</groupId>
     <artifactId>dead-simple-memcached-server</artifactId>
     <version>0.1-SNAPSHOT</version>
 
