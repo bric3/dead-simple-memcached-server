@@ -34,7 +34,7 @@ public class CanStartStopProgrammaticallyServerTest {
         server.stop();
     }
 
-    class SimpleSocketConnector {
+    private class SimpleSocketConnector {
 
         boolean canConnect(Integer portNumber) {
             try {

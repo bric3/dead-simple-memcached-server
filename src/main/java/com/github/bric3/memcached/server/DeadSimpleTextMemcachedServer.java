@@ -8,6 +8,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 public class DeadSimpleTextMemcachedServer {
     public static final int DEFAULT_PORT = 11211;
@@ -52,12 +54,13 @@ public class DeadSimpleTextMemcachedServer {
     }
 
     private void internalStart() throws InterruptedException {
-        MemcachedGetSetHandler echoHandler = new MemcachedGetSetHandler();
+        MemcachedGetSetCommandHandler echoHandler = new MemcachedGetSetCommandHandler();
         eventExecutors = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(eventExecutors)
                        .channel(NioServerSocketChannel.class)
+                       .handler(new LoggingHandler(LogLevel.INFO))
                        .localAddress(new InetSocketAddress(port))
                        .childHandler(new ChannelInitializer<SocketChannel>() {
                            @Override

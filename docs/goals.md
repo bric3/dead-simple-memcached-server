@@ -6,9 +6,9 @@ For the scope of this exercise, we consider the following simplifications:
 * Supports only the `set` and `get` operations
 * Supports none of the configuration of the original memcached, the server is always bound 
   to `TCP 0.0.0.0:11211`
-* In the protocol, `flags`, `exptime` and `noreply`  are expected by the server but ignored 
+* In the protocol, `flags`, `exptime` and `noreply` are expected by the server but ignored 
   in the `set` command
-* Only one key can be provided to the `get`  command
+* Only one key can be provided to the `get` command
 
 In order to keep the focus on the initial purpose of this exercise, which is to write 
 high­performance, concurrent code, the following constraints must be followed:
@@ -33,7 +33,9 @@ My TODO list :
 * [ ] Maven assembly
 * [x] make a simple tcp server that binds to 0.0.0.0 on a given port
 * [x] make main method
+* [x] implement set decoder
 * [ ] implement set handler
+* [ ] implement get decoder
 * [ ] implement get handler
 * [ ] investigate cache
 * [ ] performance tests 
