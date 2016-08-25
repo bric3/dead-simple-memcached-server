@@ -1,7 +1,9 @@
 package com.github.bric3.memcached.server;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
@@ -54,7 +56,8 @@ public class DeadSimpleTextMemcachedServer {
     }
 
     private void internalStart() throws InterruptedException {
-        MemcachedGetSetCommandHandler echoHandler = new MemcachedGetSetCommandHandler();
+        MemcachedGetSetCommandDecoder sharedEchoDecoder = new MemcachedGetSetCommandDecoder();
+        MemcachedGetSetCommandHandler sharedEchoHandler = new MemcachedGetSetCommandHandler(cache());
         eventExecutors = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -65,10 +68,16 @@ public class DeadSimpleTextMemcachedServer {
                        .childHandler(new ChannelInitializer<SocketChannel>() {
                            @Override
                            protected void initChannel(SocketChannel ch) {
-                               ch.pipeline().addLast(echoHandler);
+                               ch.pipeline()
+                                 .addLast(sharedEchoDecoder)
+                                 .addLast(sharedEchoHandler);
                            }
                        });
         channelFuture = serverBootstrap.bind().sync();
+    }
+
+    private ConcurrentHashMap<ByteBuf, ByteBuf> cache() {
+        return new ConcurrentHashMap<>();
     }
 
     public void stop() {

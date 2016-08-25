@@ -23,7 +23,7 @@ class MemcachedGetSetCommandDecoder extends DelimiterBasedFrameDecoder {
     private static final int MAX_COMMAND_LENGTH = 3 + 1 + 250 + 1 + 2 + 1 + Integer.BYTES + 1 + Long.BYTES;
 
     public MemcachedGetSetCommandDecoder() {
-        super(MAX_COMMAND_LENGTH, Unpooled.wrappedBuffer(new byte[]{'\r', '\n'}));
+        super(MAX_COMMAND_LENGTH, true, Unpooled.wrappedBuffer(new byte[]{'\r', '\n'}));
     }
 
 

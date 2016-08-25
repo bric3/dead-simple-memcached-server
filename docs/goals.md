@@ -34,7 +34,7 @@ My TODO list :
 * [x] make a simple tcp server that binds to 0.0.0.0 on a given port
 * [x] make main method
 * [x] implement set decoder
-* [ ] implement set handler
+* [x] implement set handler
 * [ ] implement get decoder
 * [ ] implement get handler
 * [ ] investigate cache
