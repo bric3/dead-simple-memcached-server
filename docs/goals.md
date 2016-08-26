@@ -44,8 +44,11 @@ My TODO list :
 
 Future works :
 
-* [ ] Cache reached limit
-* [ ] Flush data
-* [ ] Network packet fragmentation ?
-* [ ] Experiment on direct memory
+* [ ] Cache reached limit (set operation)
+* [ ] Experiments with socket options, like connection backlog
+* [ ] Delegate handler to another event executor
+* [ ] Network packet fragmentation under high load?
+* [ ] Experiment on ByteBuf direct memory
+* [ ] Flush all data
 * [ ] Make a JUnit rule for the server
+* [ ] Allow to pass more options via the command line
