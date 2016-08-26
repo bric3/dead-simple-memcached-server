@@ -3,8 +3,10 @@ package com.github.bric3.memcached.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static com.github.bric3.memcached.TestUtils.byteBufFromHexString;
-import static io.netty.util.CharsetUtil.UTF_8;
+import static io.netty.util.CharsetUtil.US_ASCII;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -16,34 +18,55 @@ public class MemcachedGetSetCommandHandlerTest {
     private ByteBuf payload = byteBufFromHexString(PAYLOAD);
 
     @Test
-    public void should_handle_writing_to_cache_with_set_command() {
+    public void should_handle_set_command_and_reply_STORED() {
         // Given
-        HashMap<ByteBuf, ByteBuf> cache = new HashMap<>();
+        Map<ByteBuf, ByteBuf> cache = new HashMap<>();
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandHandler(cache));
 
         // When
         embeddedChannel.writeInbound(new MemcachedSetCommand(
-                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8),
+                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", US_ASCII),
                 payload));
         embeddedChannel.finish();
 
         // Then
-        assertThat(cache).contains(entry(Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8), payload));
+        assertThat(embeddedChannel.<ByteBuf>readOutbound()).isEqualTo(Unpooled.copiedBuffer("STORED\r\n", US_ASCII));
+        assertThat(cache).contains(entry(Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", US_ASCII), payload));
     }
 
     @Test
-    public void should_handle_set_command_and_replay_STORED() {
+    public void should_handle_get_command_and_reply_VALUE_followed_by_END_when_cache_has_key() {
         // Given
-        HashMap<ByteBuf, ByteBuf> cache = new HashMap<>();
+        Map<ByteBuf, ByteBuf> cache = Collections.singletonMap(
+                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", US_ASCII),
+                payload);
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandHandler(cache));
 
         // When
-        embeddedChannel.writeInbound(new MemcachedSetCommand(
-                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8),
-                payload));
+        embeddedChannel.writeInbound(new MemcachedGetCommand(
+                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", US_ASCII)));
         embeddedChannel.finish();
 
         // Then
-        assertThat(embeddedChannel.<ByteBuf>readOutbound()).isEqualTo(Unpooled.copiedBuffer("STORED\r\n", UTF_8));
+        assertThat(embeddedChannel.<ByteBuf>readOutbound())
+                .isEqualTo(Unpooled.copiedBuffer("VALUE cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f 0 202\r\n", US_ASCII)
+                                   .writeBytes(payload)
+                                   .writeBytes(Unpooled.copiedBuffer("\r\nEND\r\n", US_ASCII)));
+    }
+
+    @Test
+    public void should_handle_get_command_and_reply_END_when_cache_dont_have_key() {
+        // Given
+        Map<ByteBuf, ByteBuf> cache = new HashMap<>();
+        EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandHandler(cache));
+
+        // When
+        embeddedChannel.writeInbound(new MemcachedGetCommand(
+                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", US_ASCII)));
+        embeddedChannel.finish();
+
+        // Then
+        assertThat(embeddedChannel.<ByteBuf>readOutbound())
+                .isEqualTo(Unpooled.copiedBuffer("END\r\n", US_ASCII));
     }
 }

@@ -36,7 +36,8 @@ My TODO list :
 * [x] implement set decoder (partial)
 * [ ] implement set correct block decoder
 * [x] implement set handler
-* [ ] implement get decoder
-* [ ] implement get handler
+* [x] implement get decoder
+* [x] implement get handler
+* [ ] handles store flags as well
 * [ ] investigate cache
 * [ ] performance tests 
