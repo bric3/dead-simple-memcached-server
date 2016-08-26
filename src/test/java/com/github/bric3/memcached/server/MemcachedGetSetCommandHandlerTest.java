@@ -30,4 +30,20 @@ public class MemcachedGetSetCommandHandlerTest {
         // Then
         assertThat(cache).contains(entry(Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8), payload));
     }
+
+    @Test
+    public void should_handle_set_command_and_replay_STORED() {
+        // Given
+        HashMap<ByteBuf, ByteBuf> cache = new HashMap<>();
+        EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandHandler(cache));
+
+        // When
+        embeddedChannel.writeInbound(new MemcachedSetCommand(
+                Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8),
+                payload));
+        embeddedChannel.finish();
+
+        // Then
+        assertThat(embeddedChannel.<ByteBuf>readOutbound()).isEqualTo(Unpooled.copiedBuffer("STORED\r\n", UTF_8));
+    }
 }

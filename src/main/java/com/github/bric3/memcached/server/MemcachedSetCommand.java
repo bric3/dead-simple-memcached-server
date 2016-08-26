@@ -1,11 +1,14 @@
 package com.github.bric3.memcached.server;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 
 class MemcachedSetCommand implements MemcachedCommand {
+    private static final ByteBuf SET = Unpooled.copiedBuffer("set", CharsetUtil.US_ASCII);
+    private static final ByteBuf STORED = Unpooled.copiedBuffer("STORED", CharsetUtil.US_ASCII);
     private ByteBuf payload;
     private ByteBuf key;
 
@@ -27,11 +30,15 @@ class MemcachedSetCommand implements MemcachedCommand {
     }
 
     public static boolean isSetCommand(ByteBuf command) {
-        return command.equals(Unpooled.wrappedBuffer(new byte[]{'s', 'e', 't'}));
+        return command.equals(SET);
     }
 
     @Override
-    public void applyOn(Map<ByteBuf, ByteBuf> cache) {
+    public void applyOn(Map<ByteBuf, ByteBuf> cache, Consumer<ByteBuf> replier) {
         cache.put(key, payload);
+
+        replier.accept(Unpooled.buffer(6 + 2)
+                               .writeBytes(STORED.retainedDuplicate().readerIndex(0))
+                               .writeBytes(CRLF.retainedDuplicate().readerIndex(0)));
     }
 }

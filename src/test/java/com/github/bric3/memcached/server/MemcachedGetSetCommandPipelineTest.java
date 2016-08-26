@@ -24,7 +24,7 @@ public class MemcachedGetSetCommandPipelineTest {
     }
 
     @Test
-    public void can_decode_set_operation_command() {
+    public void can_perform_set_command() {
         // Given
         HashMap<ByteBuf, ByteBuf> cache = new HashMap<>();
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(
@@ -36,6 +36,7 @@ public class MemcachedGetSetCommandPipelineTest {
         embeddedChannel.finish();
 
         // Then
+        assertThat(embeddedChannel.<ByteBuf>readOutbound()).isEqualTo(Unpooled.copiedBuffer("STORED\r\n", UTF_8));
         assertThat(cache).contains(entry(Unpooled.copiedBuffer("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f", UTF_8), payload));
     }
 }
