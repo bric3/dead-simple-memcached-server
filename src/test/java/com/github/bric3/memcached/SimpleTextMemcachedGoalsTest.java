@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.bric3.memcached.server.DeadSimpleTextMemcachedServer;
 import net.spy.memcached.AddrUtil;
@@ -16,38 +16,37 @@ import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 
-public class GoalsTest {
+public class SimpleTextMemcachedGoalsTest {
+    private static final int IGNORED_EXPIRATION = 0;
 
+    private static MemcachedClient textMC;
+    private static DeadSimpleTextMemcachedServer server;
 
-    public static final int IGNORED_EXPIRATION = 0;
-
-    private MemcachedClient textMC;
-    private DeadSimpleTextMemcachedServer server;
-
-    @Before
-    public void init_text_protocol_memcached_client_and_server() throws Exception {
+    @BeforeClass
+    public static void init_text_protocol_memcached_client_and_server() throws Exception {
         init_memcached_server(TestConfiguration.PORT_NUMBER);
         init_memcached_client_with_text_protocol(TestConfiguration.IPV4_ADDR, TestConfiguration.PORT_NUMBER);
     }
 
-    private void init_memcached_server(Integer portNumber) {
+    private static void init_memcached_server(Integer portNumber) {
         server = new DeadSimpleTextMemcachedServer(portNumber);
         server.start();
     }
 
-    private void init_memcached_client_with_text_protocol(String ipv4Addr, Integer portNumber) throws IOException {
+    private static void init_memcached_client_with_text_protocol(String ipv4Addr, Integer portNumber) throws IOException {
         textMC = new MemcachedClient(new ConnectionFactoryBuilder().setProtocol(TEXT)
                                                                    .build(),
                                      AddrUtil.getAddresses(ipv4Addr + ":" + portNumber));
     }
 
-    @After
-    public void shutdown_server() throws Exception {
+    @AfterClass
+    public static void shutdown_server() throws Exception {
+        textMC.shutdown();
         server.stop();
     }
 
     @Test
-    public void dead_simple_get_set_with_text_protocol() throws IOException, ExecutionException, InterruptedException {
+    public void can_set_and_get_with_string() throws IOException, ExecutionException, InterruptedException {
         // Given
         String key = UUID.randomUUID().toString();
 
@@ -60,7 +59,7 @@ public class GoalsTest {
     }
 
     @Test
-    public void dead_simple_set_with_text_protocol() throws IOException, ExecutionException, InterruptedException {
+    public void can_set_with_serialized_value() throws IOException, ExecutionException, InterruptedException {
         // Given
         String key = UUID.randomUUID().toString();
 
@@ -73,7 +72,7 @@ public class GoalsTest {
     }
 
     @Test
-    public void dead_simple_get_with_text_protocol() throws IOException, ExecutionException, InterruptedException {
+    public void can_get_non_exiting_key() throws IOException, ExecutionException, InterruptedException {
         // Given
         String key = UUID.randomUUID().toString();
 
