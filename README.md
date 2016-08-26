@@ -1,11 +1,17 @@
 Simple memcached server (only handle get/set) 
  
  
+This project requires java 8 to run. And the launch scripts expect a unix environment (Linux, OSX will do).
+ 
 ```sh
 # Package it
 mvn clean package
 
-# run it
+## packaged to a tar.gz file
+ls -l target/dead-simple-memcached-server-0.1-SNAPSHOT-batch.tar.gz
+
+
+# run it from target
 ./target/simple-memcached-server/bin/simple-memcached-server.sh 
 
 
