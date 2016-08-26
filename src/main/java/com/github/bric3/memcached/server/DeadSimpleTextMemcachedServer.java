@@ -56,20 +56,21 @@ public class DeadSimpleTextMemcachedServer {
     }
 
     private void internalStart() throws InterruptedException {
-        MemcachedGetSetCommandDecoder sharedEchoDecoder = new MemcachedGetSetCommandDecoder();
         MemcachedGetSetCommandHandler sharedEchoHandler = new MemcachedGetSetCommandHandler(cache());
         eventExecutors = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(eventExecutors)
+                       .localAddress(new InetSocketAddress(port))
                        .channel(NioServerSocketChannel.class)
                        .handler(new LoggingHandler(LogLevel.INFO))
-                       .localAddress(new InetSocketAddress(port))
+//                       .option(ChannelOption.SO_BACKLOG, 128)
+//                       .childOption(ChannelOption.SO_KEEPALIVE, true)
                        .childHandler(new ChannelInitializer<SocketChannel>() {
                            @Override
                            protected void initChannel(SocketChannel ch) {
                                ch.pipeline()
-                                 .addLast(sharedEchoDecoder)
+                                 .addLast(new MemcachedGetSetCommandDecoder())
                                  .addLast(sharedEchoHandler);
                            }
                        });

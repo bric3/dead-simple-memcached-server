@@ -52,12 +52,36 @@ public class GoalsTest {
         String key = UUID.randomUUID().toString();
 
         // When
-        OperationFuture<Boolean> whatever = textMC.set(key, IGNORED_EXPIRATION, new Value("whatever", 1_556));
+        OperationFuture<Boolean> whateverSetFuture = textMC.set(key, IGNORED_EXPIRATION, "string");
+
+        // Then
+        assertThat(whateverSetFuture.get()).isTrue();
+        assertThat(textMC.get(key)).isEqualTo("string");
+    }
+
+    @Test
+    public void dead_simple_set_with_text_protocol() throws IOException, ExecutionException, InterruptedException {
+        // Given
+        String key = UUID.randomUUID().toString();
+
+        // When
+        OperationFuture<Boolean> whateverSetFuture = textMC.set(key, IGNORED_EXPIRATION, new Value("whatever", 1_556));
 
 
         // Then
-        whatever.addListener(future -> assertThat(textMC.get(key)).isEqualTo(new Value("whatever", 1_556)));
-        whatever.get();
+        assertThat(whateverSetFuture.get()).isTrue();
+    }
+
+    @Test
+    public void dead_simple_get_with_text_protocol() throws IOException, ExecutionException, InterruptedException {
+        // Given
+        String key = UUID.randomUUID().toString();
+
+        // When
+        Object value = textMC.get(key);
+
+        // Then
+        assertThat(value).isNull();
     }
 
 
