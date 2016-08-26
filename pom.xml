@@ -92,6 +92,10 @@
                                         <maxMemorySize>5g</maxMemorySize>
                                         <extraArguments>
                                             <!--<extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>-->
+                                            <!--
+                                            This one is a bit arbitrary too, as G1 is said to help bigger heap.
+                                            We may want to switch to CMS instead.
+                                             -->
                                             <extraArgument>-XX:+UseG1GC</extraArgument>
                                             <extraArgument>-verbose:gc</extraArgument>
                                             <extraArgument>-Xloggc:simple-memcached-server-gc.log</extraArgument>
