@@ -29,7 +29,7 @@ public class SimpleTextMemcachedGoalsTest {
     }
 
     private static void init_memcached_server(Integer portNumber) {
-        server = new DeadSimpleTextMemcachedServer(portNumber);
+        server = new DeadSimpleTextMemcachedServer(portNumber, 10_000);
         server.start();
     }
 

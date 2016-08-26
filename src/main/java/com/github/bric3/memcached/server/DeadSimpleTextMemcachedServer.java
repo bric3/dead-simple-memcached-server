@@ -1,7 +1,9 @@
 package com.github.bric3.memcached.server;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.bric3.memcached.server.cache.CachedData;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -15,23 +17,38 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 public class DeadSimpleTextMemcachedServer {
-    public static final int DEFAULT_PORT = 11211;
+    private static final int DEFAULT_PORT = 11211;
+    private static final int DEFAULT_CACHE_MAX_SIZE = 10_000;
 
     private final int port;
+    private final int cacheMaxSize;
     private EventLoopGroup eventExecutors;
     private ChannelFuture channelFuture;
+    private Cache<ByteBuf, CachedData> cache;
 
-    public DeadSimpleTextMemcachedServer(int port) {
+    public DeadSimpleTextMemcachedServer(int port, int cacheMaxSize) {
         this.port = port;
+        System.out.format("Server will bind to 0.0.0.0:%d%n", port);
+        this.cacheMaxSize = cacheMaxSize;
+        System.out.format("Server can store %d elements%n", cacheMaxSize);
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int port = portFromArgsOrDefault(args);
-        new DeadSimpleTextMemcachedServer(port).startBlocking();
+        new DeadSimpleTextMemcachedServer(portFromArgsOrDefault(args),
+                                          cacheMaxSizeFromArgsOrDefault(args))
+                .startBlocking();
+    }
+
+    private static int cacheMaxSizeFromArgsOrDefault(String[] args) {
+        if (args.length != 2) {
+            System.out.format("Using default cache max size : %d%n", DEFAULT_CACHE_MAX_SIZE);
+            return DEFAULT_CACHE_MAX_SIZE;
+        }
+        return Integer.parseInt(args[1]);
     }
 
     private static int portFromArgsOrDefault(String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             System.out.format("Using default port : %d%n", DEFAULT_PORT);
             return DEFAULT_PORT;
         }
@@ -78,8 +95,12 @@ public class DeadSimpleTextMemcachedServer {
         channelFuture = serverBootstrap.bind().sync();
     }
 
-    private ConcurrentHashMap<ByteBuf, CachedData> cache() {
-        return new ConcurrentHashMap<>();
+    private Map<ByteBuf, CachedData> cache() {
+        cache = Caffeine.newBuilder()
+                        .maximumSize(cacheMaxSize)
+                        .recordStats()
+                        .build();
+        return cache.asMap();
     }
 
     public void stop() {
@@ -87,6 +108,7 @@ public class DeadSimpleTextMemcachedServer {
             try {
                 eventExecutors.shutdownGracefully().sync();
                 channelFuture.channel().closeFuture().sync();
+                cache = null;
             } catch (InterruptedException e) {
                 Thread.interrupted();
                 System.out.println("Thread interrupted while shutting down, exiting.");

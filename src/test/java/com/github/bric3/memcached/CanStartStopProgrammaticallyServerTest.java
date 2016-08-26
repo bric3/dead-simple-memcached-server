@@ -10,7 +10,7 @@ public class CanStartStopProgrammaticallyServerTest {
     @Test
     public void can_stop_the_server() {
         // given
-        DeadSimpleTextMemcachedServer server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER);
+        DeadSimpleTextMemcachedServer server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER, 10_000);
         server.start();
 
         // when
@@ -23,7 +23,7 @@ public class CanStartStopProgrammaticallyServerTest {
     @Test
     public void can_connect_to_a_started_server_before_stop() {
         // given
-        DeadSimpleTextMemcachedServer server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER);
+        DeadSimpleTextMemcachedServer server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER, 10_000);
 
 
         // when

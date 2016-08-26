@@ -39,5 +39,12 @@ My TODO list :
 * [x] implement get decoder
 * [x] implement get handler
 * [x] handles store flags as well
-* [ ] investigate cache
+* [x] investigate cache
 * [ ] performance tests 
+
+Future works :
+
+* [ ] Cache reached limit
+* [ ] Flush data
+* [ ] Network packet fragmentation ?
+* [ ] Experiment on direct memory
