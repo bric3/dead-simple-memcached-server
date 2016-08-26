@@ -1,5 +1,9 @@
 package com.github.bric3.memcached.server;
 
+import static com.github.bric3.memcached.server.MemcachedConstants.CRLF;
+import static com.github.bric3.memcached.server.MemcachedConstants.END;
+import static com.github.bric3.memcached.server.MemcachedConstants.VALUE;
+import static com.github.bric3.memcached.server.MemcachedConstants.get;
 import static io.netty.util.CharsetUtil.US_ASCII;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -7,27 +11,26 @@ import com.github.bric3.memcached.server.cache.CachedData;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
 
 class MemcachedGetCommand implements MemcachedCommand {
-    private static final ByteBuf GET = Unpooled.copiedBuffer("get", US_ASCII);
-    private static final ByteBuf VALUE = Unpooled.copiedBuffer("VALUE", US_ASCII);
-    private static final ByteBuf END = Unpooled.copiedBuffer("END", US_ASCII);
+    /**
+     * VALUE (5) + whitespace (1) + key + whitespace (1) + flags + whitespace (1) + size + CRLF (2) + payload + CRLF (2) + END (3) + CRLF (2)
+     */
     private static final int GET_WITH_SINGLE_VALUE_RESULT_OVERHEAD = 17;
+    /**
+     * END (3) + CRLF (2)
+     */
     private static final int GET_WITHOUT_RESULT_OVERHEAD = 5;
     private ByteBuf key;
 
-    public MemcachedGetCommand(ByteBuf key) {
+    MemcachedGetCommand(ByteBuf key) {
         this.key = key.asReadOnly();
     }
 
     String keyAsString() {
-        return key.toString(CharsetUtil.UTF_8);
+        return key.toString(US_ASCII);
     }
 
-    public static boolean isGetCommand(ByteBuf command) {
-        return command.equals(GET);
-    }
 
     @Override
     public void applyOn(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
@@ -45,26 +48,45 @@ class MemcachedGetCommand implements MemcachedCommand {
 
         System.out.println("found : " + ByteBufUtil.hexDump(value));
 
-        int bufferResponseInitialCapacity = key.readerIndex(0).readableBytes() +
+        int bufferResponseInitialCapacity =
+                key.readerIndex(0).readableBytes() +
                 value.readerIndex(0).readableBytes() +
                 flags.readerIndex(0).readableBytes() +
                 GET_WITH_SINGLE_VALUE_RESULT_OVERHEAD;
         ByteBuf response = Unpooled.buffer(bufferResponseInitialCapacity)
-                                   .writeBytes(VALUE.retainedDuplicate().readerIndex(0)) // VALUE
+                                   .writeBytes(VALUE.retainedDuplicate().readerIndex(0))
                                    .writeByte(' ')
-                                   .writeBytes(key.retainedDuplicate().readerIndex(0)) // key
+                                   .writeBytes(key.retainedDuplicate().readerIndex(0))
                                    .writeByte(' ')
-                                   .writeBytes(flags.retainedDuplicate().readerIndex(0)) // flags
+                                   .writeBytes(flags.retainedDuplicate().readerIndex(0))
                                    .writeByte(' ')
-                                   .writeBytes(String.valueOf(value.readableBytes()).getBytes(US_ASCII)) // size
+                                   .writeBytes(String.valueOf(value.readableBytes()).getBytes(US_ASCII))
                                    .writeBytes(CRLF.retainedDuplicate().readerIndex(0))
-                                   .writeBytes(value.slice().readerIndex(0)) // payload
+                                   .writeBytes(value.slice().readerIndex(0))
                                    .writeBytes(CRLF.retainedDuplicate().readerIndex(0))
                                    .writeBytes(END.retainedDuplicate().readerIndex(0))
                                    .writeBytes(CRLF.retainedDuplicate().readerIndex(0));
 
         System.out.println("returning :\n" + response.readerIndex(0).toString(US_ASCII));
         replier.accept(response);
+    }
 
+
+    static class GetParser implements Parser {
+        public ByteBuf command() {
+            return get;
+        }
+
+        @Override
+        public MemcachedCommand parseToCommand(ByteBuf bufferToParse) {
+            // command already read
+            bufferToParse.skipBytes(1); // whitespace
+
+            // key
+            ByteBuf key = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) '\r'));
+            System.out.println("key    : " + key.toString(US_ASCII));
+
+            return new MemcachedGetCommand(key);
+        }
     }
 }
