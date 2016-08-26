@@ -50,5 +50,5 @@ Future works :
 * [ ] Network packet fragmentation under high load?
 * [ ] Experiment on ByteBuf direct memory
 * [ ] Flush all data
-* [ ] Make a JUnit rule for the server
+* [x] Make a JUnit rule for the server
 * [ ] Allow to pass more options via the command line
