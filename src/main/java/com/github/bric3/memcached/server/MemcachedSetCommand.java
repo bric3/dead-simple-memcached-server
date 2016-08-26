@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import com.github.bric3.memcached.server.cache.CachedData;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 
@@ -48,23 +47,16 @@ class MemcachedSetCommand implements MemcachedCommand {
 
             // key
             ByteBuf key = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) ' '));
-            System.out.println("key    : " + key.toString(US_ASCII));
-
             bufferToParse.skipBytes(1); // whitespace
-
             ByteBuf flags = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) ' '));
-            System.out.println("flags  : " + flags.toString(US_ASCII));
-
             bufferToParse.skipBytes(1); // whitespace
 
             // ignore expiration time
             bufferToParse.skipBytes(bufferToParse.bytesBefore((byte) ' '));
-
             bufferToParse.skipBytes(1); // whitespace
 
             int bytesToRead = bufferToParse.bytesBefore((byte) ' ');
             ByteBuf payloadSize = bufferToParse.readRetainedSlice(bytesToRead == -1 ? bufferToParse.bytesBefore((byte) '\r') : bytesToRead);
-            System.out.println("bytes  : " + payloadSize.toString(US_ASCII));
 
             // ignore noreply
 
@@ -74,10 +66,7 @@ class MemcachedSetCommand implements MemcachedCommand {
 
             // payload
             int length = Integer.parseInt(payloadSize.toString(US_ASCII));
-            System.out.println(length);
             ByteBuf payload = bufferToParse.retainedSlice(bufferToParse.readerIndex(), length);
-            System.out.println("readable bytes" + payload.readableBytes());
-            System.out.println("value  : " + ByteBufUtil.hexDump(payload));
             return new MemcachedSetCommand(key, flags, payload);
         }
     }

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import com.github.bric3.memcached.server.cache.CachedData;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 
 class MemcachedGetCommand implements MemcachedCommand {
@@ -46,8 +45,6 @@ class MemcachedGetCommand implements MemcachedCommand {
         ByteBuf value = cachedData.payload;
         ByteBuf flags = cachedData.flags;
 
-        System.out.println("found : " + ByteBufUtil.hexDump(value));
-
         int bufferResponseInitialCapacity =
                 key.readerIndex(0).readableBytes() +
                 value.readerIndex(0).readableBytes() +
@@ -67,7 +64,6 @@ class MemcachedGetCommand implements MemcachedCommand {
                                    .writeBytes(END.retainedDuplicate().readerIndex(0))
                                    .writeBytes(CRLF.retainedDuplicate().readerIndex(0));
 
-        System.out.println("returning :\n" + response.readerIndex(0).toString(US_ASCII));
         replier.accept(response);
     }
 
@@ -84,8 +80,6 @@ class MemcachedGetCommand implements MemcachedCommand {
 
             // key
             ByteBuf key = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) '\r'));
-            System.out.println("key    : " + key.toString(US_ASCII));
-
             return new MemcachedGetCommand(key);
         }
     }

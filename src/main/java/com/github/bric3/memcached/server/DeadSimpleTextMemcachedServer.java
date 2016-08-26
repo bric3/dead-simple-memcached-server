@@ -72,7 +72,7 @@ public class DeadSimpleTextMemcachedServer {
                            protected void initChannel(SocketChannel ch) {
                                ch.pipeline()
                                  .addLast(new MemcachedGetSetCommandDecoder())
-                                 .addLast(sharedEchoHandler);
+                                 .addLast(sharedEchoHandler); // possibly schedule on DefaultEventExecutorGroup
                            }
                        });
         channelFuture = serverBootstrap.bind().sync();
