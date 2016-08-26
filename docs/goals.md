@@ -40,10 +40,11 @@ My TODO list :
 * [x] implement get handler
 * [x] handles store flags as well
 * [x] investigate cache
-* [ ] performance tests 
+* [x] performance tests (dumb one) 
 
 Future works :
 
+* [ ] better performance tests 
 * [ ] Cache reached limit (set operation)
 * [ ] Experiments with socket options, like connection backlog
 * [ ] Delegate handler to another event executor

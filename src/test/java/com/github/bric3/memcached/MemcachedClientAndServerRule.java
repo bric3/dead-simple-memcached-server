@@ -10,15 +10,24 @@ import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.MemcachedClient;
 
 public class MemcachedClientAndServerRule implements MethodRule {
+    private final int cacheMaxSize;
     private DeadSimpleTextMemcachedServer server;
     private MemcachedClient textMC;
+
+    public MemcachedClientAndServerRule() {
+        this(10_000);
+    }
+
+    public MemcachedClientAndServerRule(int cacheMaxSize) {
+        this.cacheMaxSize = cacheMaxSize;
+    }
 
     @Override
     public Statement apply(Statement base, FrameworkMethod method, Object target) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER, 10_000);
+                server = new DeadSimpleTextMemcachedServer(TestConfiguration.PORT_NUMBER, cacheMaxSize);
                 server.start();
 
                 textMC = new MemcachedClient(new ConnectionFactoryBuilder().setProtocol(TEXT)
