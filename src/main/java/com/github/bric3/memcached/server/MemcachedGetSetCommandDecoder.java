@@ -1,6 +1,6 @@
 package com.github.bric3.memcached.server;
 
-import static io.netty.util.CharsetUtil.UTF_8;
+import static io.netty.util.CharsetUtil.US_ASCII;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -32,7 +32,7 @@ class MemcachedGetSetCommandDecoder extends DelimiterBasedFrameDecoder {
     protected Object decode(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
         System.out.println("----decoder----\n");
         System.out.println("actual buffer hex : \n" + ByteBufUtil.hexDump(buffer));
-        System.out.println("actual buffer : \n" + buffer.toString(UTF_8));
+        System.out.println("actual buffer : \n" + buffer.toString(US_ASCII));
         ByteBuf textFrame = (ByteBuf) super.decode(ctx, buffer);
         // if frame does not end by CRLF
         if (textFrame == null) {
@@ -41,37 +41,41 @@ class MemcachedGetSetCommandDecoder extends DelimiterBasedFrameDecoder {
 
         // command
         ByteBuf command = textFrame.readSlice(textFrame.bytesBefore((byte) ' '));
-        System.out.println("command: " + command.toString(CharsetUtil.UTF_8));
-
-        textFrame.skipBytes(1); // whitespace
-
-        // key
-        ByteBuf key = readKey(textFrame);
-        System.out.println("key    : " + key.toString(CharsetUtil.UTF_8));
-
-        // ignore the rest of the line (for now, as there is still the size)
+        System.out.println("command: " + command.toString(CharsetUtil.US_ASCII));
 
         if (MemcachedSetCommand.isSetCommand(command)) {
+            textFrame.skipBytes(1); // whitespace
+
+            // key
+            ByteBuf key = textFrame.readSlice(textFrame.bytesBefore((byte) ' '));
+            System.out.println("key    : " + key.toString(CharsetUtil.US_ASCII));
+
+            textFrame.skipBytes(1); // whitespace
+
+            ByteBuf flags = textFrame.readSlice(textFrame.bytesBefore((byte) ' '));
+            System.out.println("flags  : " + flags.toString(CharsetUtil.US_ASCII));
+
+            // ignore expiration time
+            // TODO do not ignore byte size
+            // ignore noreply
+
             // payload
             ByteBuf payload = (ByteBuf) super.decode(ctx, buffer);
             System.out.println("value  : " + ByteBufUtil.hexDump(payload));
-            return new MemcachedSetCommand(key, payload);
+            return new MemcachedSetCommand(key, flags, payload);
         }
         if (MemcachedGetCommand.isGetCommand(command)) {
+            textFrame.skipBytes(1); // whitespace
+
+            // key
+            ByteBuf key = textFrame.slice();
+            System.out.println("key    : " + key.toString(CharsetUtil.US_ASCII));
+
             return new MemcachedGetCommand(key);
         }
 
         System.out.println("----decoder----\n");
         return UnknownCommand.INSTANCE;
-    }
-
-    private ByteBuf readKey(ByteBuf textFrame) {
-        int bytesToRead = textFrame.bytesBefore((byte) ' ');
-        // nothing after key
-        if (bytesToRead == -1) {
-            return textFrame.slice();
-        }
-        return textFrame.readSlice(bytesToRead);
     }
 
 

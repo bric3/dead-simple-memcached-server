@@ -38,6 +38,6 @@ My TODO list :
 * [x] implement set handler
 * [x] implement get decoder
 * [x] implement get handler
-* [ ] handles store flags as well
+* [x] handles store flags as well
 * [ ] investigate cache
 * [ ] performance tests 

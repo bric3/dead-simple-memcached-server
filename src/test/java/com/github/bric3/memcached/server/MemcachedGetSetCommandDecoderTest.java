@@ -45,7 +45,7 @@ public class MemcachedGetSetCommandDecoderTest {
         Object decoded = embeddedChannel.readInbound();
         assertThat(decoded).isInstanceOf(MemcachedSetCommand.class);
         assertThat(((MemcachedSetCommand) decoded).keyAsString()).isEqualTo("cdc40be0-ea6b-4ebf-bf9a-b635cfb0af8f");
-        assertThat(((MemcachedSetCommand) decoded).payload().readableBytes()).isEqualTo(202);
+        assertThat(((MemcachedSetCommand) decoded).payload.readableBytes()).isEqualTo(202);
     }
 
     @Test

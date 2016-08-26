@@ -46,6 +46,19 @@ public class SimpleTextMemcachedGoalsTest {
     }
 
     @Test
+    public void can_set_and_get_with_serialized_value() throws IOException, ExecutionException, InterruptedException {
+        // Given
+        String key = UUID.randomUUID().toString();
+
+        // When
+        OperationFuture<Boolean> whateverSetFuture = textMC.set(key, IGNORED_EXPIRATION, new Value("whatever", 73));
+
+        // Then
+        assertThat(whateverSetFuture.get()).isTrue();
+        assertThat(textMC.get(key)).isEqualTo(new Value("whatever", 73));
+    }
+
+    @Test
     public void can_set_and_get_with_string() throws IOException, ExecutionException, InterruptedException {
         // Given
         String key = UUID.randomUUID().toString();

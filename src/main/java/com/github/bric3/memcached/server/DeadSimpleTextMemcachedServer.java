@@ -2,6 +2,7 @@ package com.github.bric3.memcached.server;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
+import com.github.bric3.memcached.server.cache.CachedData;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -77,7 +78,7 @@ public class DeadSimpleTextMemcachedServer {
         channelFuture = serverBootstrap.bind().sync();
     }
 
-    private ConcurrentHashMap<ByteBuf, ByteBuf> cache() {
+    private ConcurrentHashMap<ByteBuf, CachedData> cache() {
         return new ConcurrentHashMap<>();
     }
 
