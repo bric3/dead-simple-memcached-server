@@ -30,7 +30,7 @@ My TODO list :
 
 
 * [x] pom structure  
-* [ ] Maven assembly
+* [x] Maven assembly
 * [x] make a simple tcp server that binds to 0.0.0.0 on a given port
 * [x] make main method
 * [x] implement set decoder (partial)
@@ -48,3 +48,4 @@ Future works :
 * [ ] Flush data
 * [ ] Network packet fragmentation ?
 * [ ] Experiment on direct memory
+* [ ] Make a JUnit rule for the server
