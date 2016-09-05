@@ -48,7 +48,9 @@ Future works :
 * [ ] Cache reached limit (set operation)
 * [ ] Experiments with socket options, like connection backlog
 * [ ] Delegate handler to another event executor
-* [ ] Network packet fragmentation under high load?
+* [x] Network inbound packet fragmentation under high load?
+* [ ] Network outbound packet fragmentation under high load?
+* [ ] Avoid the cost of the `ReplayDecoder` (throws REPLAY Signal), maybe using checkpoint
 * [ ] Experiment on ByteBuf direct memory
 * [ ] Flush all data
 * [x] Make a JUnit rule for the server

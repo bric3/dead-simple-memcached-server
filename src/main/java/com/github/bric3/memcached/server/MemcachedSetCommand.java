@@ -70,6 +70,9 @@ class MemcachedSetCommand implements MemcachedCommand {
             // payload
             int length = Integer.parseInt(payloadSize.toString(US_ASCII));
             ByteBuf payload = bufferToParse.retainedSlice(bufferToParse.readerIndex(), length);
+
+            // advance buffer reader position after payload
+            bufferToParse.readerIndex(bufferToParse.readerIndex() + payload.readableBytes() + CRLF.length);
             return new MemcachedSetCommand(key, flags, payload);
         }
     }

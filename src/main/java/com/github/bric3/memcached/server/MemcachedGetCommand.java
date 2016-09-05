@@ -80,6 +80,9 @@ class MemcachedGetCommand implements MemcachedCommand {
 
             // key
             ByteBuf key = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) '\r'));
+
+            // advance buffer position for next command
+            bufferToParse.readerIndex(bufferToParse.readerIndex() + CRLF.length);
             return new MemcachedGetCommand(key);
         }
     }

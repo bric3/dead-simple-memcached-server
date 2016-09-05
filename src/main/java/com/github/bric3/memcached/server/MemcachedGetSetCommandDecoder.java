@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.ReplayingDecoder;
 
-class MemcachedGetSetCommandDecoder extends ByteToMessageDecoder {
+class MemcachedGetSetCommandDecoder extends ReplayingDecoder {
     private final AllCommands allCommands = new AllCommands()
             .register(new MemcachedGetCommand.GetParser())
             .register(new MemcachedSetCommand.SetParser());
@@ -19,13 +19,10 @@ class MemcachedGetSetCommandDecoder extends ByteToMessageDecoder {
 
     private MemcachedCommand decode(ByteBuf buffer) throws Exception {
         // command
-        ByteBuf command = buffer.readSlice(buffer.bytesBefore((byte) ' '));
+        int length = buffer.bytesBefore((byte) ' ');
+        ByteBuf command = buffer.readSlice(length);
 
-        MemcachedCommand memcachedCommand = allCommands.tryParse(command, buffer);
-
-        // make sure there's nothing left to parse
-        buffer.readerIndex(buffer.readerIndex() + buffer.readableBytes());
-        return memcachedCommand;
+        return allCommands.tryParse(command, buffer);
     }
 
     private class AllCommands {

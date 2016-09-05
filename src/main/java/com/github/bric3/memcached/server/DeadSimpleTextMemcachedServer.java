@@ -105,6 +105,7 @@ public class DeadSimpleTextMemcachedServer {
 
     public void stop() {
         if (channelFuture != null) {
+            System.out.println("Shutting down. Cache contained " + cache.estimatedSize() + " entries");
             try {
                 eventExecutors.shutdownGracefully().sync();
                 channelFuture.channel().closeFuture().sync();

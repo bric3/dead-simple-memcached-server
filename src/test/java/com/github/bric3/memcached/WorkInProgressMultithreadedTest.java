@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -17,14 +18,17 @@ public class WorkInProgressMultithreadedTest {
     public MemcachedClientAndServerRule serverRule = new MemcachedClientAndServerRule(10_000);
 
     @Test
-    public void exercise_server_with_multiple_client_iterating_over_a_finite_shuffled_set_of_keys() {
+    public void exercise_server_with_multiple_client_iterating_over_a_finite_shuffled_set_of_keys() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         List<String> keys = prepareKeys(10_000);
 
         for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-            executorService.submit(new MyRunnable(keys));
+            executorService.execute(new MyRunnable(keys));
         }
+
+        executorService.shutdown();
+        executorService.awaitTermination(1, TimeUnit.HOURS);
     }
 
     private class MyRunnable implements Runnable {
@@ -47,7 +51,6 @@ public class WorkInProgressMultithreadedTest {
                 }
             }
         }
-
     }
 
     private List<String> prepareKeys(int count) {
