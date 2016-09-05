@@ -44,30 +44,33 @@ class MemcachedSetCommand implements MemcachedCommand {
 
         @Override
         public MemcachedCommand parseToCommand(ByteBuf bufferToParse) {
-            bufferToParse.skipBytes(1); // whitespace
+            // COMMAND LINE
+            int remainingCommandLineSize = bufferToParse.bytesBefore((byte) '\r');
+            ByteBuf remainingCommandLine = bufferToParse.readSlice(remainingCommandLineSize);
+
+            remainingCommandLine.skipBytes(1); // whitespace
 
             // key
-            ByteBuf key = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) ' '));
-            bufferToParse.skipBytes(1); // whitespace
-            ByteBuf flags = bufferToParse.readRetainedSlice(bufferToParse.bytesBefore((byte) ' '));
-            bufferToParse.skipBytes(1); // whitespace
+            ByteBuf key = remainingCommandLine.readRetainedSlice(remainingCommandLine.bytesBefore((byte) ' '));
+            remainingCommandLine.skipBytes(1); // whitespace
+            ByteBuf flags = remainingCommandLine.readRetainedSlice(remainingCommandLine.bytesBefore((byte) ' '));
+            remainingCommandLine.skipBytes(1); // whitespace
 
             // ignore expiration time
-            bufferToParse.skipBytes(bufferToParse.bytesBefore((byte) ' '));
-            bufferToParse.skipBytes(1); // whitespace
+            remainingCommandLine.skipBytes(remainingCommandLine.bytesBefore((byte) ' '));
+            remainingCommandLine.skipBytes(1); // whitespace
 
-            int bytesToReadBeforeSPACE = bufferToParse.bytesBefore((byte) ' ');
-            int bytesToReadBeforeCR = bufferToParse.bytesBefore((byte) '\r');
-            int bytesToReadBeforeCROrSPACE = Math.max(Math.min(bytesToReadBeforeCR, bytesToReadBeforeSPACE), bytesToReadBeforeCR);
-            ByteBuf payloadSize = bufferToParse.readRetainedSlice(bytesToReadBeforeCROrSPACE);
+            int bytesToReadBeforeSPACE = remainingCommandLine.bytesBefore((byte) ' ');
+            int bytesToReadBeforeCROrSPACE = Math.max(bytesToReadBeforeSPACE, remainingCommandLine.readableBytes());
+            ByteBuf payloadSize = remainingCommandLine.readSlice(bytesToReadBeforeCROrSPACE);
 
             // ignore noreply
 
-            // skip CRLF
+            // LINE SEPARATOR
             bufferToParse.skipBytes(bufferToParse.bytesBefore((byte) '\r') + 1);
             bufferToParse.skipBytes(bufferToParse.bytesBefore((byte) '\n') + 1);
 
-            // payload
+            // PAYLOAD
             int length = Integer.parseInt(payloadSize.toString(US_ASCII));
             ByteBuf payload = bufferToParse.retainedSlice(bufferToParse.readerIndex(), length);
 

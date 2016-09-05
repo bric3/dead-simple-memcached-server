@@ -3,6 +3,7 @@ package com.github.bric3.memcached.server;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
@@ -14,10 +15,10 @@ class MemcachedGetSetCommandDecoder extends ReplayingDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        out.add(decode(in));
+        decode(in).ifPresent(out::add);
     }
 
-    private MemcachedCommand decode(ByteBuf buffer) throws Exception {
+    private Optional<MemcachedCommand> decode(ByteBuf buffer) throws Exception {
         // command
         int length = buffer.bytesBefore((byte) ' ');
         ByteBuf command = buffer.readSlice(length);
@@ -33,9 +34,9 @@ class MemcachedGetSetCommandDecoder extends ReplayingDecoder {
             return this;
         }
 
-        public MemcachedCommand tryParse(ByteBuf command, ByteBuf buffer) {
-            return commands.getOrDefault(command, UnknownCommand.UNKNOWN_PARSER)
-                           .parseToCommand(buffer);
+        public Optional<MemcachedCommand> tryParse(ByteBuf command, ByteBuf buffer) {
+            return Optional.ofNullable(commands.getOrDefault(command, UnknownCommand.UNKNOWN_PARSER)
+                                               .parseToCommand(buffer));
         }
     }
 

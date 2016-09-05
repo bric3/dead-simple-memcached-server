@@ -1,14 +1,12 @@
 package com.github.bric3.memcached.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static com.github.bric3.memcached.TestUtils.byteBufFromHexString;
 import org.junit.Test;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.DecoderException;
 import io.netty.util.CharsetUtil;
 
 public class MemcachedGetSetCommandDecoderTest {
@@ -28,7 +26,7 @@ public class MemcachedGetSetCommandDecoderTest {
      *   it's followed by an empty data block).
      *
      * * [x] parse the datablock
-     * * [ ] handle \r\n within the datablock with the size in bytes
+     * * [x] handle \r\n within the datablock with the size in bytes
      */
 
     @Test
@@ -67,7 +65,9 @@ public class MemcachedGetSetCommandDecoderTest {
     public void cannot_decode_malformed() {
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandDecoder());
 
-        assertThatThrownBy(() -> embeddedChannel.writeInbound(malformed)).isInstanceOf(DecoderException.class);
+        embeddedChannel.writeInbound(malformed);
+
+        assertThat(embeddedChannel.<Object>readInbound()).isNull();
     }
 
     @Test
@@ -79,7 +79,7 @@ public class MemcachedGetSetCommandDecoderTest {
         embeddedChannel.writeInbound(unknown_operation);
 
         // Then
-        assertThat(embeddedChannel.<Object>readInbound()).isInstanceOf(UnknownCommand.class);
+        assertThat(embeddedChannel.<Object>readInbound()).isNull();
     }
 
     @Test
