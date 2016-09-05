@@ -33,7 +33,7 @@ public class DeadSimpleTextMemcachedServer {
         System.out.format("Server can store %d elements%n", cacheMaxSize);
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         new DeadSimpleTextMemcachedServer(portFromArgsOrDefault(args),
                                           cacheMaxSizeFromArgsOrDefault(args))
                 .startBlocking();
@@ -55,12 +55,16 @@ public class DeadSimpleTextMemcachedServer {
         return Integer.parseInt(args[0]);
     }
 
-    private void startBlocking() throws InterruptedException {
+    private void startBlocking() {
         try {
-            internalStart();
-            channelFuture.channel().closeFuture().sync();
-        } finally {
-            eventExecutors.shutdownGracefully().sync();
+            try {
+                internalStart();
+                channelFuture.channel().closeFuture().sync();
+            } finally {
+                eventExecutors.shutdownGracefully().sync();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted, exiting.");
         }
     }
 
@@ -68,8 +72,8 @@ public class DeadSimpleTextMemcachedServer {
         try {
             internalStart();
         } catch (InterruptedException e) {
-            Thread.interrupted();
-            System.out.println("Thread interrupted, exiting.");
+            Thread.currentThread().interrupt();
+            System.out.println("Interrupted, exiting.");
         }
     }
 
@@ -111,7 +115,7 @@ public class DeadSimpleTextMemcachedServer {
                 channelFuture.channel().closeFuture().sync();
                 cache = null;
             } catch (InterruptedException e) {
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
                 System.out.println("Thread interrupted while shutting down, exiting.");
             }
         }
