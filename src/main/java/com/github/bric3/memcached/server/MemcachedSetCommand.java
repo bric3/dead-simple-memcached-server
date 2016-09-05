@@ -1,5 +1,6 @@
 package com.github.bric3.memcached.server;
 
+import static com.github.bric3.memcached.server.MemcachedConstants.CRLF;
 import static com.github.bric3.memcached.server.MemcachedConstants.STORED;
 import static com.github.bric3.memcached.server.MemcachedConstants.set;
 import static io.netty.util.CharsetUtil.US_ASCII;
@@ -31,8 +32,8 @@ class MemcachedSetCommand implements MemcachedCommand {
         cache.put(key, new CachedData(flags, payload));
 
         replier.accept(Unpooled.buffer(6 + 2)
-                               .writeBytes(STORED.retainedDuplicate().readerIndex(0))
-                               .writeBytes(MemcachedConstants.CRLF.retainedDuplicate().readerIndex(0)));
+                               .writeBytes(STORED)
+                               .writeBytes(CRLF));
     }
 
     public static class SetParser implements Parser {
@@ -55,8 +56,10 @@ class MemcachedSetCommand implements MemcachedCommand {
             bufferToParse.skipBytes(bufferToParse.bytesBefore((byte) ' '));
             bufferToParse.skipBytes(1); // whitespace
 
-            int bytesToRead = bufferToParse.bytesBefore((byte) ' ');
-            ByteBuf payloadSize = bufferToParse.readRetainedSlice(bytesToRead == -1 ? bufferToParse.bytesBefore((byte) '\r') : bytesToRead);
+            int bytesToReadBeforeSPACE = bufferToParse.bytesBefore((byte) ' ');
+            int bytesToReadBeforeCR = bufferToParse.bytesBefore((byte) '\r');
+            int bytesToReadBeforeCROrSPACE = Math.max(Math.min(bytesToReadBeforeCR, bytesToReadBeforeSPACE), bytesToReadBeforeCR);
+            ByteBuf payloadSize = bufferToParse.readRetainedSlice(bytesToReadBeforeCROrSPACE);
 
             // ignore noreply
 

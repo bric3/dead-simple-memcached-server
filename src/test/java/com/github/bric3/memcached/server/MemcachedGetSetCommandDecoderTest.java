@@ -3,7 +3,6 @@ package com.github.bric3.memcached.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static com.github.bric3.memcached.TestUtils.byteBufFromHexString;
-import org.junit.Ignore;
 import org.junit.Test;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -72,7 +71,6 @@ public class MemcachedGetSetCommandDecoderTest {
     }
 
     @Test
-    @Ignore("handler may fail on non supported commands")
     public void cannot_decode_non_get_or_set_command() {
         // Given
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(new MemcachedGetSetCommandDecoder());

@@ -35,8 +35,8 @@ class MemcachedGetCommand implements MemcachedCommand {
     public void applyOn(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
         if (!cache.containsKey(key)) {
             replier.accept(Unpooled.buffer(GET_WITHOUT_RESULT_OVERHEAD)
-                                   .writeBytes(END.retainedDuplicate().readerIndex(0))
-                                   .writeBytes(CRLF.retainedDuplicate().readerIndex(0)));
+                                   .writeBytes(END)
+                                   .writeBytes(CRLF));
             return;
         }
 
@@ -51,18 +51,18 @@ class MemcachedGetCommand implements MemcachedCommand {
                 flags.readerIndex(0).readableBytes() +
                 GET_WITH_SINGLE_VALUE_RESULT_OVERHEAD;
         ByteBuf response = Unpooled.buffer(bufferResponseInitialCapacity)
-                                   .writeBytes(VALUE.retainedDuplicate().readerIndex(0))
+                                   .writeBytes(VALUE)
                                    .writeByte(' ')
                                    .writeBytes(key.retainedDuplicate().readerIndex(0))
                                    .writeByte(' ')
                                    .writeBytes(flags.retainedDuplicate().readerIndex(0))
                                    .writeByte(' ')
                                    .writeBytes(String.valueOf(value.readableBytes()).getBytes(US_ASCII))
-                                   .writeBytes(CRLF.retainedDuplicate().readerIndex(0))
+                                   .writeBytes(CRLF)
                                    .writeBytes(value.slice().readerIndex(0))
-                                   .writeBytes(CRLF.retainedDuplicate().readerIndex(0))
-                                   .writeBytes(END.retainedDuplicate().readerIndex(0))
-                                   .writeBytes(CRLF.retainedDuplicate().readerIndex(0));
+                                   .writeBytes(CRLF)
+                                   .writeBytes(END)
+                                   .writeBytes(CRLF);
 
         replier.accept(response);
     }
