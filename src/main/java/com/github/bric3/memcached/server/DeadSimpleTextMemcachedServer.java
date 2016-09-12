@@ -78,7 +78,7 @@ public class DeadSimpleTextMemcachedServer {
     }
 
     private void internalStart() throws InterruptedException {
-        MemcachedGetSetCommandHandler sharedEchoHandler = new MemcachedGetSetCommandHandler(cache());
+        MemcachedGetSetCommandHandler sharedGetSetCommandHandler = new MemcachedGetSetCommandHandler(cache());
         eventExecutors = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -93,7 +93,7 @@ public class DeadSimpleTextMemcachedServer {
                            protected void initChannel(SocketChannel ch) {
                                ch.pipeline()
                                  .addLast(new MemcachedGetSetCommandDecoder())
-                                 .addLast(sharedEchoHandler); // possibly schedule on DefaultEventExecutorGroup
+                                 .addLast(sharedGetSetCommandHandler); // possibly schedule on DefaultEventExecutorGroup
                            }
                        });
         channelFuture = serverBootstrap.bind().sync();
