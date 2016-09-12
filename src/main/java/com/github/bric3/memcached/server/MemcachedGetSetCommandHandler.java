@@ -20,7 +20,7 @@ class MemcachedGetSetCommandHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         MemcachedCommand command = (MemcachedCommand) msg;
 
-        command.applyOn(cache, ctx::write);
+        command.processAndReply(cache, ctx::write);
     }
 
     @Override

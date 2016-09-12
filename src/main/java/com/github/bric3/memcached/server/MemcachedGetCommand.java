@@ -32,7 +32,7 @@ class MemcachedGetCommand implements MemcachedCommand {
 
 
     @Override
-    public void applyOn(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
+    public void processAndReply(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
         if (!cache.containsKey(key)) {
             replier.accept(Unpooled.buffer(GET_WITHOUT_RESULT_OVERHEAD)
                                    .writeBytes(END)

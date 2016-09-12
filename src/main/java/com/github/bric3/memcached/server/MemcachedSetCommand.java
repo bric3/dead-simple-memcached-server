@@ -28,7 +28,7 @@ class MemcachedSetCommand implements MemcachedCommand {
 
 
     @Override
-    public void applyOn(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
+    public void processAndReply(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {
         cache.put(key, new CachedData(flags, payload));
 
         replier.accept(Unpooled.buffer(6 + 2)

@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
 
 interface MemcachedCommand {
 
-    default void applyOn(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {}
+    default void processAndReply(Map<ByteBuf, CachedData> cache, Consumer<ByteBuf> replier) {}
 
     interface Parser {
         MemcachedCommand parseToCommand(ByteBuf buffer);
