@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bric3/dead-simple-memcached-server.svg?branch=master)](https://travis-ci.org/bric3/dead-simple-memcached-server)
+
 Simple memcached server (only handle get/set) 
  
  
